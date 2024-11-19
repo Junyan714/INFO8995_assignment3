@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web_service:
+    build: ./web_service
+    ports:
+      - "5000:5000"
+    environment:
+      - CONFIG_FILE=config.txt
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app_network
+
+  load_balancer:
+    build: ./load_balancer
+    ports:
+      - "8080:80"
+    depends_on:
+      web_service:
+        condition: service_healthy
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
